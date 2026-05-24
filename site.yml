@@ -1,6 +1,6 @@
 - hosts: all
   roles:
-  - devsec.hardening
+  - devsec.hardening.ssh_hardening
 
 - hosts: storage
   roles:
