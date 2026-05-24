@@ -1,0 +1,21 @@
+[Unit]
+Description=OpenWRT firewall VM service
+Wants=libvirtd.service
+Requires=libvirtd.service
+After=libvirtd.service network.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStartPre=/usr/bin/nmcli connection up "{{ firewall_vm_lan_bridge_conn_name }}"
+ExecStartPre=/usr/bin/nmcli connection up "{{ firewall_vm_wan_bridge_conn_name }}"
+ExecStartPre=/usr/bin/test -z "{{ firewall_vm_wan_nic }}" || /usr/bin/nmcli connection up "{{ firewall_vm_wan_slave_conn_name }}"
+ExecStart=/usr/bin/bash -lc 'virsh domstate "{{ firewall_vm_name }}" 2>/dev/null | grep -qw running || virsh start "{{ firewall_vm_name }}"'
+ExecStop=/usr/bin/bash -lc 'virsh domstate "{{ firewall_vm_name }}" 2>/dev/null | grep -qw running && virsh shutdown "{{ firewall_vm_name }}" || true'
+ExecStopPost=/usr/bin/nmcli connection down "{{ firewall_vm_wan_slave_conn_name }}" || true
+ExecStopPost=/usr/bin/nmcli connection down "{{ firewall_vm_wan_bridge_conn_name }}" || true
+ExecStopPost=/usr/bin/nmcli connection down "{{ firewall_vm_lan_bridge_conn_name }}" || true
+TimeoutSec=120
+
+[Install]
+WantedBy=multi-user.target

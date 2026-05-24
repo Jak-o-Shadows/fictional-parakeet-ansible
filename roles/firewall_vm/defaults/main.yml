@@ -9,9 +9,19 @@ firewall_vm_disk_path: "{{ firewall_vm_image_dir }}/{{ firewall_vm_name }}.qcow2
 firewall_vm_image_url: ''
 firewall_vm_image_path: "{{ firewall_vm_image_dir }}/{{ firewall_vm_name }}-openwrt.img"
 firewall_vm_image_checksum: ''
+firewall_vm_lan_bridge: br-lan
+firewall_vm_wan_bridge: br-wan
+firewall_vm_lan_ip: 192.168.100.1/24
+firewall_vm_wan_nic: ''
+firewall_vm_lan_bridge_conn_name: "{{ firewall_vm_name }}-lan-bridge"
+firewall_vm_wan_bridge_conn_name: "{{ firewall_vm_name }}-wan-bridge"
+firewall_vm_wan_slave_conn_name: "{{ firewall_vm_name }}-wan-slave"
+firewall_vm_systemd_unit: firewall-vm.service
+firewall_vm_service_enabled: true
+firewall_vm_service_state: started
 firewall_vm_networks:
-  - network: default
-  - network: default
+  - bridge: "{{ firewall_vm_lan_bridge }}"
+  - bridge: "{{ firewall_vm_wan_bridge }}"
 firewall_vm_packages:
   - qemu-kvm
   - libvirt
