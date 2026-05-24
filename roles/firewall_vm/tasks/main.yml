@@ -1,0 +1,54 @@
+- name: Ensure libvirtd is enabled and running
+  service:
+    name: libvirtd
+    state: started
+    enabled: yes
+
+- name: Ensure OpenWRT image directory exists
+  file:
+    path: "{{ firewall_vm_image_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Validate OpenWRT image settings for VM creation
+  assert:
+    that:
+      - "not firewall_vm_define or firewall_vm_image_url != ''"
+    fail_msg: "firewall_vm_define requires firewall_vm_image_url to be set so the OpenWRT image can be downloaded."
+
+- name: Download OpenWRT image
+  get_url:
+    url: "{{ firewall_vm_image_url }}"
+    dest: "{{ firewall_vm_image_path }}"
+    mode: '0644'
+    checksum: "{{ firewall_vm_image_checksum | default(omit) }}"
+  when: firewall_vm_image_url != ''
+
+- name: Unpack OpenWRT image if compressed
+  command: gunzip -k "{{ firewall_vm_image_path }}"
+  args:
+    creates: "{{ firewall_vm_image_path | regex_replace('\\.gz$', '') }}"
+  when:
+    - firewall_vm_image_url != ''
+    - firewall_vm_image_path.endswith('.gz')
+
+- name: Define and start the firewall VM
+  virt:
+    name: "{{ firewall_vm_name }}"
+    state: running
+    autostart: yes
+    memory: "{{ firewall_vm_memory }}"
+    vcpus: "{{ firewall_vm_vcpus }}"
+    disks:
+      - path: "{{ firewall_vm_disk_path }}"
+        size: "{{ firewall_vm_disk_size_gb }}"
+        type: qcow2
+        device: disk
+        disk_bus: virtio
+      - path: "{{ firewall_vm_image_path | regex_replace('\\.gz$', '') }}"
+        device: cdrom
+        type: raw
+    networks: "{{ firewall_vm_networks }}"
+  when: firewall_vm_define

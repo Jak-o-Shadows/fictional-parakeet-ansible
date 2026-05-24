@@ -9,6 +9,10 @@
 #  - snapraid_mergerfs
 #  - samba
 
+- hosts: firewall_router
+  roles:
+  - firewall_vm
+
 #- hosts: other_group
 #  roles:
   # Placeholder for other roles in the future 

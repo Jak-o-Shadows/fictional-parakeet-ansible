@@ -1,0 +1,22 @@
+---
+firewall_vm_define: false
+firewall_vm_name: firewall-vm
+firewall_vm_memory: 2048
+firewall_vm_vcpus: 2
+firewall_vm_disk_size_gb: 20
+firewall_vm_image_dir: /var/lib/libvirt/images
+firewall_vm_disk_path: "{{ firewall_vm_image_dir }}/{{ firewall_vm_name }}.qcow2"
+firewall_vm_image_url: ''
+firewall_vm_image_path: "{{ firewall_vm_image_dir }}/{{ firewall_vm_name }}-openwrt.img"
+firewall_vm_image_checksum: ''
+firewall_vm_networks:
+  - network: default
+  - network: default
+firewall_vm_packages:
+  - qemu-kvm
+  - libvirt
+  - libvirt-daemon
+  - libvirt-daemon-driver-qemu
+  - virt-install
+  - python3-libvirt
+  - libguestfs-tools
