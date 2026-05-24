@@ -1,0 +1,38 @@
+- name: Install EPEL
+  package:
+    name: epel-release
+    state: present
+
+- name: Install Fail2ban
+  package:
+    name: 
+      - fail2ban
+    state: present
+
+- name: Install Fail2ban-Firewalld
+  package:
+    name: fail2ban-firewalld
+    state: present
+  when: use_firewalld
+
+
+- name: Ensure firewalld is enabled and running
+  service:
+    name: firewalld
+    state: started
+    enabled: yes
+
+- name: Deploy Fail2ban jail config
+  template:
+    src: jail.local.j2
+    dest: /etc/fail2ban/jail.local
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart fail2ban
+
+- name: Ensure Fail2ban is enabled and running
+  service:
+    name: fail2ban
+    state: started
+    enabled: yes

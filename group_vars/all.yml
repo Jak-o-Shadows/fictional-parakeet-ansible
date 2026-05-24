@@ -3,6 +3,8 @@ packages_common:
   - nvim
   - git
 
+use_firewalld: true
+
 
 ssh_server_ports: ['6475']
 ssh_client_password_login: true
