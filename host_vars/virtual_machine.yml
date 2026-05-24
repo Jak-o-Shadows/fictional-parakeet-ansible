@@ -1,0 +1,11 @@
+#snapraid_disks:
+#  - { data: "/mnt/disk1", content: "/var/snapraid/content1" }
+#  - { data: "/mnt/disk2", content: "/var/snapraid/content2" }
+#snapraid_parity_disks:
+#  - { data: "/mnt/disk3", content: "/var/snapraid/content3" }
+
+#mergerfs_mounts:
+#  - { path: "/mnt/storage", sources: "/mnt/disk1:/mnt/disk2" }
+
+#samba_shares:
+#  - { name: "media", path: "/mnt/storage/media" }

@@ -1,0 +1,6 @@
+# Shared server-wide defaults
+samba_workgroup: "WORKGROUP"
+snapraid_common_settings:
+  dummy: "asdf placeholder for when I figure i tout"
+mergerfs_common_settings:
+  dummy: "asdf placeholder for when I figure i tout"

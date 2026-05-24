@@ -1,0 +1,12 @@
+- hosts: all
+  roles:
+  - devsec.hardening
+
+- hosts: storage
+  roles:
+  - snapraid_mergerfs
+  - samba
+
+#- hosts: other_group
+#  roles:
+  # Placeholder for other roles in the future 

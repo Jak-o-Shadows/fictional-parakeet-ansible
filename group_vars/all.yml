@@ -1,0 +1,8 @@
+timezone: "Australia/Adelaide"
+packages_common:
+  - nvim
+  - git
+
+
+ssh_server_ports: ['6475']
+ssh_client_password_login: true
