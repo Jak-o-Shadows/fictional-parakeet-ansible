@@ -1,0 +1,22 @@
+- name: Apply DevSec SSH Hardening
+  include_role:
+    name: devsec.hardening.ssh_hardening
+
+- name: Ensure firewalld is installed
+  package:
+    name: firewalld
+    state: present
+
+- name: Ensure firewalld is running
+  service:
+    name: firewalld
+    state: started
+    enabled: yes
+
+- name: Open SSH ports in firewalld
+  firewalld:
+    port: "{{ item }}/tcp"
+    permanent: true
+    state: enabled
+    immediate: true
+  loop: "{{ ssh_server_ports }}"

@@ -1,0 +1,1 @@
+Uses `devsec.hardening.ssh_hardening`, but opens the firewall part so it's useful
