@@ -3,9 +3,9 @@
   - devsec.hardening.ssh_hardening
 
 - hosts: storage
-  roles:
-  - snapraid_mergerfs
-  - samba
+#  roles:
+#  - snapraid_mergerfs
+#  - samba
 
 #- hosts: other_group
 #  roles:
