@@ -9,3 +9,7 @@
 
 #samba_shares:
 #  - { name: "media", path: "/mnt/storage/media" }
+
+
+# Firewall-router configs
+firewall_vm_wan_pci_address: '0000:00:04.0'

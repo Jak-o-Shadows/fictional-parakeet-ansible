@@ -26,6 +26,7 @@ firewall_vm_networks:
   - bridge: "{{ firewall_vm_lan_bridge }}"
 ## WAN PCI passthrough: provide the host PCI address for the WAN NIC.
 # Example format: '0000:03:00.0'
+# Get the full adress via lscpi -D
 firewall_vm_wan_pci_address: ''
 
 firewall_vm_systemd_unit: firewall-vm.service
