@@ -1,14 +1,17 @@
+# Basic
 - name: Ensure libvirtd is enabled and running
   service:
     name: libvirtd
     state: started
     enabled: yes
 
+################# LAN BRIDGE ###################
 - name: Check if LAN bridge connection exists
   command: nmcli -t connection show "{{ firewall_vm_lan_bridge_conn_name }}"
   register: lan_bridge_conn
   failed_when: false
   changed_when: false
+
 
 - name: Create LAN bridge connection
   command: >
@@ -18,6 +21,7 @@
       autoconnect yes
   when: lan_bridge_conn.rc != 0
 
+
 - name: Configure LAN bridge connection
   command: >
     nmcli connection modify "{{ firewall_vm_lan_bridge_conn_name }}"
@@ -25,36 +29,53 @@
       autoconnect yes
   when: lan_bridge_conn.rc == 0
 
-- name: Check if WAN bridge connection exists
-  command: nmcli -t connection show "{{ firewall_vm_wan_bridge_conn_name }}"
-  register: wan_bridge_conn
-  failed_when: false
+
+################## WAN PCI PASSTHROUGH ###################
+
+- name: Validate PCI address format
+  assert:
+    that:
+      - firewall_vm_wan_pci_address is match("^[0-9a-fA-F]{4}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}\\.[0-7]$")
+    fail_msg: "firewall_vm_wan_pci_address must be like '0000:03:00.0'"
+
+
+- name: Ensure PCI device exists
+  stat:
+    path: "/sys/bus/pci/devices/{{ firewall_vm_wan_pci_address }}"
+  register: pci_dev
+  failed_when: not pci_dev.stat.exists
+
+
+- name: Load vfio modules
+  modprobe:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - vfio
+    - vfio_pci
+
+
+- name: Read current driver for PCI device
+  command: readlink -f /sys/bus/pci/devices/{{ firewall_vm_wan_pci_address }}/driver || true
+  register: current_driver
   changed_when: false
 
-- name: Create WAN bridge connection
-  command: >
-    nmcli connection add type bridge conn.name "{{ firewall_vm_wan_bridge_conn_name }}"
-      ifname "{{ firewall_vm_wan_bridge }}"
-      ipv4.method disabled
-      autoconnect yes
-  when: wan_bridge_conn.rc != 0
 
-- name: Check if WAN slave connection exists
-  command: nmcli -t connection show "{{ firewall_vm_wan_slave_conn_name }}"
-  register: wan_slave_conn
-  failed_when: false
-  changed_when: false
-  when: firewall_vm_wan_nic != ''
-
-- name: Attach WAN NIC to WAN bridge
-  command: >
-    nmcli connection add type bridge-slave conn.name "{{ firewall_vm_wan_slave_conn_name }}"
-      ifname "{{ firewall_vm_wan_nic }}"
-      master "{{ firewall_vm_wan_bridge }}"
-      autoconnect yes
+- name: Unbind from current driver (if needed)
+  command: echo "{{ firewall_vm_wan_pci_address }}" > /sys/bus/pci/drivers/{{ current_driver.stdout | basename }}/unbind
   when:
-    - firewall_vm_wan_nic != ''
-    - wan_slave_conn.rc != 0
+    - current_driver.stdout != ''
+    - "'vfio-pci' not in current_driver.stdout"
+
+
+- name: Bind PCI to vfio-pci
+  shell: |
+    echo {{ firewall_vm_wan_pci_address }} > /sys/bus/pci/drivers/vfio-pci/bind
+  args:
+    warn: false
+
+
+################ Create the Virtual Machine ###################
 
 - name: Ensure OpenWRT image directory exists
   file:
@@ -64,11 +85,13 @@
     group: root
     mode: '0755'
 
+
 - name: Validate OpenWRT image settings for VM creation
   assert:
     that:
-      - "not firewall_vm_define or firewall_vm_image_url != ''"
-    fail_msg: "firewall_vm_define requires firewall_vm_image_url to be set so the OpenWRT image can be downloaded."
+      - "not firewall_vm_image_url != ''"
+    fail_msg: "requires firewall_vm_image_url to be set so the OpenWRT image can be downloaded."
+
 
 - name: Download OpenWRT image
   get_url:
@@ -78,6 +101,7 @@
     checksum: "{{ firewall_vm_image_checksum | default(omit) }}"
   when: firewall_vm_image_url != ''
 
+
 - name: Unpack OpenWRT image if compressed
   command: gunzip -k "{{ firewall_vm_image_path }}"
   args:
@@ -86,11 +110,12 @@
     - firewall_vm_image_url != ''
     - firewall_vm_image_path.endswith('.gz')
 
+
 - name: Define the firewall VM
   virt:
     name: "{{ firewall_vm_name }}"
     state: defined
-    autostart: no
+    autostart: yes
     memory: "{{ firewall_vm_memory }}"
     vcpus: "{{ firewall_vm_vcpus }}"
     disks:
@@ -102,8 +127,16 @@
       - path: "{{ firewall_vm_image_path | regex_replace('\\.gz$', '') }}"
         device: cdrom
         type: raw
-    networks: "{{ firewall_vm_networks }}"
-  when: firewall_vm_define
+    networks:
+      - bridge: "{{ firewall_vm_networks }}"
+    host_devices:
+      - type: pci
+        address:
+          domain: "0x{{ firewall_vm_wan_pci_address.split(':')[0] }}"
+          bus:   "0x{{ firewall_vm_wan_pci_address.split(':')[1] }}"
+          slot:  "0x{{ firewall_vm_wan_pci_address.split(':')[2].split('.')[0] }}"
+          function: "0x{{ firewall_vm_wan_pci_address.split(':')[2].split('.')[1] }}"
+
 
 - name: Install firewall VM systemd service unit
   template:
@@ -113,6 +146,7 @@
     group: root
     mode: '0644'
   when: firewall_vm_define
+
 
 - name: Ensure firewall VM systemd service is enabled and started
   systemd:

@@ -1,7 +1,7 @@
 ---
-firewall_vm_define: false
+## Role defaults for firewall_vm
 firewall_vm_name: firewall-vm
-firewall_vm_memory: 2048
+firewall_vm_memory: 512
 firewall_vm_vcpus: 2
 firewall_vm_disk_size_gb: 20
 firewall_vm_image_dir: /var/lib/libvirt/images
@@ -9,19 +9,29 @@ firewall_vm_disk_path: "{{ firewall_vm_image_dir }}/{{ firewall_vm_name }}.qcow2
 firewall_vm_image_url: ''
 firewall_vm_image_path: "{{ firewall_vm_image_dir }}/{{ firewall_vm_name }}-openwrt.img"
 firewall_vm_image_checksum: ''
+## This role defines the VM by default and configures WAN via PCI passthrough.
+## - The LAN is exposed to the guest via a libvirt bridge (see `firewall_vm_lan_bridge`).
+## - The WAN is passed through to the guest using a host PCI device; set
+##   `firewall_vm_wan_pci_address` to the device (e.g. '0000:03:00.0').
+## Notes:
+## - `firewall_vm_lan_bridge` is the kernel network device name (bridge interface).
+## - `firewall_vm_lan_bridge_conn_name` is the NetworkManager connection/profile name
+##   used to bring the bridge up/down via nmcli. Keeping the profile name distinct
+##   from the interface name helps manage per-VM profiles while keeping stable
+##   device names for libvirt.
 firewall_vm_lan_bridge: br-lan
-firewall_vm_wan_bridge: br-wan
-firewall_vm_lan_ip: 192.168.100.1/24
-firewall_vm_wan_nic: ''
 firewall_vm_lan_bridge_conn_name: "{{ firewall_vm_name }}-lan-bridge"
-firewall_vm_wan_bridge_conn_name: "{{ firewall_vm_name }}-wan-bridge"
-firewall_vm_wan_slave_conn_name: "{{ firewall_vm_name }}-wan-slave"
+firewall_vm_lan_ip: 192.168.100.1/24
+firewall_vm_networks:
+  - bridge: "{{ firewall_vm_lan_bridge }}"
+## WAN PCI passthrough: provide the host PCI address for the WAN NIC.
+# Example format: '0000:03:00.0'
+firewall_vm_wan_pci_address: ''
+
 firewall_vm_systemd_unit: firewall-vm.service
 firewall_vm_service_enabled: true
 firewall_vm_service_state: started
-firewall_vm_networks:
-  - bridge: "{{ firewall_vm_lan_bridge }}"
-  - bridge: "{{ firewall_vm_wan_bridge }}"
+
 firewall_vm_packages:
   - qemu-kvm
   - libvirt
