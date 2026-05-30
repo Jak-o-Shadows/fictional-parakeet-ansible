@@ -26,7 +26,7 @@
 
 - name: Create LAN bridge connection
   command: >
-    nmcli connection add type bridge conn.name "{{ firewall_vm_lan_bridge_conn_name }}"
+    nmcli connection add connection.type bridge connection.name "{{ firewall_vm_lan_bridge_conn_name }}"
       ifname "{{ firewall_vm_lan_bridge }}"
       ipv4.method manual ipv4.addresses "{{ firewall_vm_lan_ip }}"
       autoconnect yes
@@ -36,7 +36,7 @@
 - name: Configure LAN bridge connection
   command: >
     nmcli connection modify "{{ firewall_vm_lan_bridge_conn_name }}"
-      ipv4.method manual ipv4.addresses "{{ firewall_vm_lan_ip }}"
+      ipv4.method manual ipv4.addresses {{ firewall_vm_lan_ip }}
       autoconnect yes
   when: lan_bridge_conn.rc == 0
 
