@@ -126,7 +126,7 @@
 - name: Define the firewall VM
   virt:
     name: "{{ firewall_vm_name }}"
-    state: defined
+    state: shutdown
     autostart: yes
     memory: "{{ firewall_vm_memory }}"
     vcpus: "{{ firewall_vm_vcpus }}"
