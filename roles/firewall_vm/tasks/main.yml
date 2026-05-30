@@ -83,10 +83,8 @@
 
 
 - name: Bind PCI to vfio-pci
-  shell:
+  command:
     echo "{{ firewall_vm_wan_pci_address }}" > /sys/bus/pci/drivers/vfio-pci/bind
-  args:
-    warn: false
 
 
 ################ Create the Virtual Machine ###################
