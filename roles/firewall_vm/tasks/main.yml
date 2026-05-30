@@ -124,7 +124,7 @@
 
 
 - name: Define the firewall VM
-  virt:
+  community.libvirt.virt:
     name: "{{ firewall_vm_name }}"
     state: shutdown
     autostart: yes
