@@ -101,7 +101,7 @@
 - name: Validate OpenWRT image settings for VM creation
   assert:
     that:
-      - "not firewall_vm_image_url != ''"
+      - "firewall_vm_image_url != ''"
     fail_msg: "requires firewall_vm_image_url to be set so the OpenWRT image can be downloaded."
 
 

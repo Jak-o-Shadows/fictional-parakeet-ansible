@@ -14,3 +14,4 @@
 # Firewall-router configs
 firewall_vm_wan_pci_address: '0000:00:04.0'
 firewall_vm_image_url: "https://downloads.openwrt.org/releases/25.12.4/targets/x86/64/openwrt-25.12.4-x86-64-generic-targz-combined-efi.img.gz"
+#firewall_vm_image_checksum: 12bb4c57d9f0c300141858fc10041a38e9f80c170c51add1174dcb17884cd0f7
