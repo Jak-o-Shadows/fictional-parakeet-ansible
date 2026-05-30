@@ -123,32 +123,16 @@
     - firewall_vm_image_url.endswith('.gz')
 
 
-- name: Define the firewall VM
-  community.libvirt.virt:
-    name: "{{ firewall_vm_name }}"
-    state: shutdown
-    autostart: yes
-    memory: "{{ firewall_vm_memory }}"
-    vcpus: "{{ firewall_vm_vcpus }}"
-    disks:
-      - path: "{{ firewall_vm_disk_path }}"
-        size: "{{ firewall_vm_disk_size_gb }}"
-        type: qcow2
-        device: disk
-        disk_bus: virtio
-      - path: "{{ firewall_vm_image_path | regex_replace('\\.gz$', '') }}"
-        device: cdrom
-        type: raw
-    networks:
-      - bridge: "{{ firewall_vm_networks }}"
-    host_devices:
-      - type: pci
-        address:
-          domain: "0x{{ firewall_vm_wan_pci_address.split(':')[0] }}"
-          bus:   "0x{{ firewall_vm_wan_pci_address.split(':')[1] }}"
-          slot:  "0x{{ firewall_vm_wan_pci_address.split(':')[2].split('.')[0] }}"
-          function: "0x{{ firewall_vm_wan_pci_address.split(':')[2].split('.')[1] }}"
+- name: Render firewall VM XML
+  template:
+    src: firewall_vm.xml.j2
+    dest: "/etc/libvirt/qemu/{{ firewall_vm_name }}.xml"
+    owner: root
+    group: root
+    mode: '0644'
 
+- name: Define VM in libvirt
+  command: virsh define /etc/libvirt/qemu/{{ firewall_vm_name }}.xml
 
 - name: Install firewall VM systemd service unit
   template:

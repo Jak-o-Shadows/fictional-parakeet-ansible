@@ -1,0 +1,57 @@
+<domain type='kvm'>
+  <name>{{ firewall_vm_name }}</name>
+  <memory unit='MiB'>{{ firewall_vm_memory }}</memory>
+  <vcpu>{{ firewall_vm_vcpus }}</vcpu>
+
+  <os>
+    <type arch='x86_64'>hvm</type>
+    <boot dev='cdrom'/>
+    <boot dev='hd'/>
+  </os>
+
+  <features>
+    <acpi/>
+    <apic/>
+    <pae/>
+  </features>
+
+  <cpu mode='host-passthrough'/>
+
+  <devices>
+
+    <!-- Primary disk -->
+    <disk type='file' device='disk'>
+      <driver name='qemu' type='qcow2'/>
+      <source file='{{ firewall_vm_disk_path }}'/>
+      <target dev='vda' bus='virtio'/>
+    </disk>
+
+    <!-- OpenWRT ISO / IMG -->
+    <disk type='file' device='cdrom'>
+      <driver name='qemu' type='raw'/>
+      <source file='{{ firewall_vm_image_path | regex_replace("\.gz$", "") }}'/>
+      <target dev='hdb' bus='ide'/>
+      <readonly/>
+    </disk>
+
+    <!-- Network bridge -->
+    <interface type='bridge'>
+      <source bridge='{{ firewall_vm_networks }}'/>
+      <model type='virtio'/>
+    </interface>
+
+    <!-- PCI passthrough -->
+    <hostdev mode='subsystem' type='pci' managed='yes'>
+      <source>
+        <address
+          domain='0x{{ firewall_vm_wan_pci_address.split(":")[0] }}'
+          bus='0x{{ firewall_vm_wan_pci_address.split(":")[1] }}'
+          slot='0x{{ firewall_vm_wan_pci_address.split(":")[2].split(".")[0] }}'
+          function='0x{{ firewall_vm_wan_pci_address.split(":")[2].split(".")[1] }}'/>
+      </source>
+    </hostdev>
+
+    <graphics type='vnc' port='-1' listen='0.0.0.0'/>
+    <console type='pty'/>
+  </devices>
+</domain>
