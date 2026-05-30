@@ -108,19 +108,19 @@
 - name: Download OpenWRT image
   get_url:
     url: "{{ firewall_vm_image_url }}"
-    dest: "{{ firewall_vm_image_path }}"
+    dest: "{{ firewall_vm_image_dir }}/{{ firewall_vm_image_url | basename }}"
     mode: '0644'
     checksum: "{{ firewall_vm_image_checksum | default(omit) }}"
   when: firewall_vm_image_url != ''
 
 
 - name: Unpack OpenWRT image if compressed
-  command: gunzip -k "{{ firewall_vm_image_path }}"
+  command: gunzip -k "{{ firewall_vm_image_dir }}/{{ firewall_vm_image_url | basename }}"
   args:
-    creates: "{{ firewall_vm_image_path | regex_replace('\\.gz$', '') }}"
+    creates: "{{ firewall_vm_image_dir }}/{{ firewall_vm_image_url | basename | regex_replace('\\.gz$', '') }}"
   when:
     - firewall_vm_image_url != ''
-    - firewall_vm_image_path.endswith('.gz')
+    - "{{ firewall_vm_image_url }}".endswith('.gz')
 
 
 - name: Define the firewall VM

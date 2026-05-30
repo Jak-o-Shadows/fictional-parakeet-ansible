@@ -54,7 +54,7 @@ When the service is stopped, the VM is shut down and the LAN/WAN host connection
         firewall_vm_vcpus: 2
         firewall_vm_image_url: https://downloads.openwrt.org/releases/25.12.4/targets/x86/64/openwrt-25.12.4-x86-64-generic-squashfs-combined-efi.img.gz
         firewall_vm_image_checksum: 013d5f6df2d33c9ca75c5059a0fe759cca0271572006c02ea877299966e1dff6
-        firewall_vm_image_path: /var/lib/libvirt/images/openwrt-firewall.img.gz
+        firewall_vm_image_path: /var/lib/libvirt/images/openwrt/
         firewall_vm_lan_bridge: br-lan
         firewall_vm_lan_ip: 192.168.100.1/24
         firewall_vm_wan_bridge: br-wan
