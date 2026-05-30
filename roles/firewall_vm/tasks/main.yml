@@ -120,7 +120,7 @@
     creates: "{{ firewall_vm_image_dir }}/{{ firewall_vm_image_url | basename | regex_replace('\\.gz$', '') }}"
   when:
     - firewall_vm_image_url != ''
-    - "{{ firewall_vm_image_url }}".endswith('.gz')
+    - firewall_vm_image_url.endswith('.gz')
 
 
 - name: Define the firewall VM
