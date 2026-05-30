@@ -1,4 +1,15 @@
-# Basic
+################# PREREQUISITES ###################
+
+- name: Install libvirt packages (RedHat-based)
+  dnf:
+    name:
+      - libvirt
+      - libvirt-devel
+      - qemu-kvm
+      - python3-libvirt
+    state: present
+  when: ansible_os_family == "RedHat"
+
 - name: Ensure libvirtd is enabled and running
   service:
     name: libvirtd
