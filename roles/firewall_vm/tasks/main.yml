@@ -83,7 +83,7 @@
 
 
 - name: Bind PCI to vfio-pci
-  shell: |
+  shell:
     echo "{{ firewall_vm_wan_pci_address }}" > /sys/bus/pci/drivers/vfio-pci/bind
   args:
     warn: false
