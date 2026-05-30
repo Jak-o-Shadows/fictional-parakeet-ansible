@@ -36,7 +36,7 @@
 
     <!-- Network bridge -->
     <interface type='bridge'>
-      <source bridge='{{ firewall_vm_networks }}'/>
+      <source bridge='{{ firewall_vm_lan_bridge }}'/>
       <model type='virtio'/>
     </interface>
 

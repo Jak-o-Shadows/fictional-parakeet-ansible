@@ -22,8 +22,6 @@ firewall_vm_image_checksum: ''
 firewall_vm_lan_bridge: br-lan
 firewall_vm_lan_bridge_conn_name: "{{ firewall_vm_name }}-lan-bridge"
 firewall_vm_lan_ip: 192.168.100.1/24
-firewall_vm_networks:
-  - bridge: "{{ firewall_vm_lan_bridge }}"
 ## WAN PCI passthrough: provide the host PCI address for the WAN NIC.
 # Example format: '0000:03:00.0'
 # Get the full adress via lscpi -D
